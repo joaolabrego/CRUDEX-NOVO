@@ -1,0 +1,358 @@
+.form {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    /* Altere para 5 para cinco colunas */
+    gap: 2dvmin;
+    justify-items: center;
+    align-items: stretch;
+    padding: 1dvmin;
+}
+
+.form fieldset {
+    border: none;
+    color: black;
+    font-size: var(--font-size-browse);
+    font-weight: normal;
+    text-align: left;
+    width: 100%;
+}
+
+.form fieldset:disabled {
+    opacity: 0.65;
+}
+
+.form .tedit-field[data-behavior-disabled="true"] {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.form .tedit-field {
+    color: black;
+    font-size: var(--font-size-browse);
+    font-weight: normal;
+    text-align: left;
+    width: 100%;
+}
+
+.form .tedit-field.tedit-checkbox-inline {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.form .tedit-checkbox-row {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+}
+
+.form .tedit-field.tedit-checkbox-inline[data-readonly="false"] .tedit-caption,
+.form .tedit-field.tedit-checkbox-inline[data-readonly="false"] .tedit-checkbox-spacer {
+    cursor: pointer;
+    user-select: none;
+}
+
+.form .tedit-caption {
+    font-weight: bold;
+}
+
+.form fieldset legend {
+    font-weight: bold;
+}
+
+.form fieldset.tedit-condition-field {
+    justify-self: stretch;
+}
+
+.tedit-condition-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.35dvmin;
+    width: 100%;
+    margin-left: 0;
+}
+
+.tedit-operator-host {
+    flex: 0 0 auto;
+    padding-top: 0;
+}
+
+.tedit-condition-row .tedit-operator-host {
+    height: var(--field-height);
+    display: flex;
+    align-items: center;
+}
+
+.tedit-operator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: var(--field-height);
+    padding: 0;
+    border: 0.1dvmin solid #000;
+    border-radius: 0.1dvmin;
+    background: var(--background-color-control);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    cursor: pointer;
+    margin: 0;
+}
+
+.tedit-operator-symbol {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 0 1ch;
+    text-align: center;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.tedit-operator-menu {
+    position: absolute;
+    top: calc(100% + 0.1dvmin);
+    left: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    border: 0.1dvmin solid #000;
+    border-radius: 0.1dvmin;
+    background: #fff;
+    box-shadow: 0 0.2dvmin 0.4dvmin rgba(0, 0, 0, 0.15);
+}
+
+.tedit-operator-menu[hidden] {
+    display: none !important;
+}
+
+.tedit-operator-item {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.2dvmin 1ch;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    text-align: center;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+.tedit-operator-item:hover,
+.tedit-operator-item.selected {
+    background: #555;
+    color: #fff;
+}
+
+.tedit-condition-value {
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-left: 0 !important;
+}
+
+.tedit-body {
+    max-width: var(--field-max-width);
+    box-sizing: border-box;
+}
+
+.form input:not([type="checkbox"]):not(.tcheckbox-validity),
+.form textarea,
+.form .tdropdown-input,
+.form .tdropdown-trigger {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+.form input[type="checkbox"] {
+    width: var(--font-size-browse);
+    height: var(--font-size-browse);
+}
+
+.form input:not([type="checkbox"]):not(.tcheckbox-validity):not(.tdropdown-input) {
+    width: 100%;
+    height: var(--field-height);
+    padding: 0.5dvmin;
+    box-sizing: border-box;
+    border: 0.1dvmin solid #000;
+    border-radius: 0.1dvmin;
+}
+
+.form .tdropdown-input {
+    text-align: left;
+    padding: 0.5dvmin 2.4dvmin 0.5dvmin 0.5dvmin;
+}
+
+.tedit-body .tdropdown {
+    box-sizing: border-box;
+}
+
+.form textarea {
+    width: 100%;
+    min-height: calc(2 * var(--field-height));
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.buttonsBar {
+    grid-column: span 5;
+    /* Ajusta para 5 caso use cinco colunas */
+    text-align: center;
+    margin-top: 1dvmin;
+}
+
+.buttonsBar .button {
+    margin-top: 1dvmin;
+    margin-bottom: 1dvmin;
+    margin-right: 5dvmin;
+    width: 20dvmin;
+    height: 3.5dvmin;
+    font-size: var(--font-size-browse);
+    text-align: center;
+    background-color: var(--background-color-control);
+    background-position: var(--button-icon-inset) center;
+    background-repeat: no-repeat;
+    background-size: var(--button-icon-size) auto;
+}
+
+.buttonsBar .button:hover,
+.buttonsBar .button:focus-visible {
+    background-color: var(--browse-current-row-color);
+    background-repeat: no-repeat;
+    background-position: var(--button-icon-inset) center;
+    background-size: var(--button-icon-size) auto;
+}
+
+.buttonsBar .button:active {
+    background-color: var(--background-color-active);
+    background-repeat: no-repeat;
+    background-position: var(--button-icon-inset) center;
+    background-size: var(--button-icon-size) auto;
+}
+
+.master-detail-workspace {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    gap: 1dvmin;
+}
+
+.master-pane {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.master-pane > .form {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-content: start;
+}
+
+.detail-pane {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.master-detail-workspace > .buttonsBar,
+.form-screen > .buttonsBar {
+    flex-shrink: 0;
+    grid-column: unset;
+    margin-top: 0;
+}
+
+.detail-tabs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5ch;
+    padding: 0 0.5ch;
+}
+
+.detail-tab {
+    flex: 1;
+    padding: 0.6dvmin 0.5dvmin;
+    font-size: 1.3dvmin;
+    text-transform: uppercase;
+    background: var(--background-color-control);
+    border: solid 0.1dvmin black;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    color: black;
+}
+
+.detail-tab:hover {
+    background: var(--background-color-focus);
+}
+
+.detail-tab.active {
+    background: var(--background-color-focus);
+    font-weight: bold;
+}
+
+.detail-browse-section .container {
+    --rows-per-page: var(--rows-per-child-page);
+}
+
+.detail-browse-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.detail-pane-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.detail-browse-section {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.detail-browse-section.active {
+    display: flex;
+}
+
+.main > .master-detail-workspace {
+    flex: 1;
+    min-height: 0;
+}
+
+.form-screen {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.form-screen > .form {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-content: start;
+}

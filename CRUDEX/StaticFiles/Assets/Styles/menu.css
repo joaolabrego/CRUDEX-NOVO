@@ -1,0 +1,87 @@
+.menu {
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+    height: var(--control-height);
+    padding: 1dvmin 0;
+    border: 0.2dvmin solid black;
+}
+
+.menu ul li {
+    display: inline;
+    background-color: var(--background-color-control);
+    float: left;
+    width: var(--menu-width);
+    height: var(--control-height);
+    line-height: var(--control-height);
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.menu>ul>li {
+    border-radius: var(--border-radius);
+    border-top-left-radius: var(--border-radius);
+    margin-left: 0.5ch;
+    margin-right: 0.5ch;
+}
+
+.menu ul {
+    padding: 0px;
+}
+
+.menu ul ul {
+    display: none;
+    margin-top: 0;
+    padding-top: 1dvmin;
+}
+.menu ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+
+.menu ul li:hover>ul {
+    display: block;
+}
+
+.menu ul ul ul {
+    margin-left: calc(var(--menu-width) + 0.1ch);
+    top: 0;
+    position: absolute;
+}
+
+.menu ul li:hover,
+.menu ul ul li:hover,
+.menu ul ul ul li:hover {
+    background-color: var(--background-color-focus);
+}
+
+.menu ul li:active,
+.menu ul ul li:active,
+.menu ul ul ul li:active {
+    background-color: var(--background-color-active);
+}
+
+.parentMenu {
+    float: right;
+    font-size: 2dvmin;
+}
+
+.menu ul li a {
+    display: inline-block;
+    width: 90%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.firstItem {
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+}
+
+.lastItem {
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}

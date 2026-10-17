@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TypeScriptTarget>ES6</TypeScriptTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TypeScriptTarget>ES6</TypeScriptTarget>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>6d2b2f40-ad3b-41f8-b3ec-38b8a1ccc336</UserSecretsId>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-arm64</RuntimeIdentifiers>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <StartupObject>CRUDEX.Classes.Program</StartupObject>
+    <PlatformTarget>x64</PlatformTarget>
+	<NoWarn>$(NoWarn);AD0001</NoWarn>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="StaticFiles\testes\GeradorScripts.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="StaticFiles\testes\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="StaticFiles\Classes\TColumn.mjs" />
+    <None Remove="StaticFiles\Classes\TConfig.mjs" />
+    <None Remove="StaticFiles\Classes\TDatabase.mjs" />
+    <None Remove="StaticFiles\Classes\TDialog.mjs" />
+    <None Remove="StaticFiles\Classes\TForm.mjs" />
+    <None Remove="StaticFiles\Classes\TBrowse.mjs" />
+    <None Remove="StaticFiles\Classes\TLogin.mjs" />
+    <None Remove="StaticFiles\Classes\TMenu.mjs" />
+    <None Remove="StaticFiles\Classes\TScreen.mjs" />
+    <None Remove="StaticFiles\Classes\TSystem.mjs" />
+    <None Remove="StaticFiles\Classes\TTable.mjs" />
+    <None Remove="StaticFiles\Classes\TType.mjs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="StaticFiles\Assets\Styles\3th\normalize.css" />
+    <Content Include="StaticFiles\Assets\Styles\dialog.css" />
+    <Content Include="StaticFiles\Assets\Styles\form.css" />
+    <Content Include="StaticFiles\Assets\Styles\login.css" />
+    <Content Include="StaticFiles\Assets\Styles\main.css" />
+    <Content Include="StaticFiles\Assets\Styles\menu.css" />
+    <Content Include="StaticFiles\Assets\Styles\screen.css" />
+    <Content Include="StaticFiles\Assets\Images\alert.png" />
+    <Content Include="StaticFiles\Assets\Images\cancel.png" />
+    <Content Include="StaticFiles\Assets\Images\confirm.png" />
+    <Content Include="StaticFiles\Assets\Images\delete.png" />
+    <Content Include="StaticFiles\Assets\Images\edit.png" />
+    <Content Include="StaticFiles\Assets\Images\error.png" />
+    <Content Include="StaticFiles\Assets\Images\exit.png" />
+    <Content Include="StaticFiles\Assets\Images\favicon.png" />
+    <Content Include="StaticFiles\Assets\Images\filter.png" />
+    <Content Include="StaticFiles\Assets\Images\insert.png" />
+    <Content Include="StaticFiles\Assets\Images\question.png" />
+    <Content Include="StaticFiles\Assets\Images\zoom.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
+    <PackageReference Include="ExcelDataReader" Version="3.8.0" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.8.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.6" />
+  </ItemGroup>
+</Project>

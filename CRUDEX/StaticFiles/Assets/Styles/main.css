@@ -1,0 +1,59 @@
+:root {
+    --text-height: 3dvmin;
+    --background-color: bisque;
+    --background-color-control: burlywood;
+    --background-color-focus: thistle;
+    --background-color-active: beige;
+    --background-color-extra: brown;
+    --browse-current-row-color: palevioletred;
+    --menu-width: 0ch;
+    --screen-gap: 2px;
+    --control-height: 5dvmin;
+    --field-height: 2.8dvmin;
+    --field-h-chrome: 1.2dvmin;
+    --button-icon-inset: 0.6dvmin;
+    --button-icon-size: 2.4dvmin;
+    --select-edge-inset: 0.35dvmin;
+    --field-max-width: 45ch;
+    --opacity-screen: 0.5;
+    --font-size-browse: 1.5dvmin;
+    --font-size-body: 2.0dvmin;
+    --border-radius: 2dvmin;
+    --rows-per-page: 35;
+    --rows-per-child-page: 15;
+    --browse-thead-height: 1.5dvmin;
+    --browse-tfoot-height: 1.5dvmin;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: Arial;
+    font-size: var(--font-size-body);
+    font-weight: bold;
+    color: blue;
+    background-color: grey;
+    overflow: hidden;
+    user-select: none;
+    height: 100vh;
+}
+
+    body > dialog {
+        position: fixed;
+        margin: 0;
+    }
+
+.box {
+    z-index: 1;
+    border: 0.2dvmin solid black;
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+}

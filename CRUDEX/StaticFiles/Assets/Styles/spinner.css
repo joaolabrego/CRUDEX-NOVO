@@ -1,0 +1,25 @@
+﻿.spinner {
+    width: min(15dvmin, 15dvmax);
+    height: min(15dvmin, 15dvmax);
+    border: min(2dvmin, 2dvmax) solid var(--background-color-control);
+    border-top: min(2dvmin, 2dvmax) solid var(--background-color-focus);
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+    padding: 0;
+    margin: auto;
+    background-color: transparent;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}

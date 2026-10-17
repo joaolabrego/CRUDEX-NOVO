@@ -1,0 +1,38 @@
+.dialog {
+    text-align: center;
+    margin: auto;
+    padding: 1dvmin;
+    background-color: var(--background-color-control);
+    user-select: none;
+}
+
+.dialog>img {
+    width: 10dvmin;
+}
+
+.dialog>p {
+    margin: 2ch 5ch;
+    word-wrap: break-word;
+}
+
+.dialog button {
+    text-transform: uppercase;
+    outline: 0;
+    background: var(--background-color-control);
+    width: 15dvmin;
+    height: var(--control-height);
+    border: 0;
+    font-size: inherit;
+    padding: 1dvmin;
+    background-color: var(--background-color);
+    font-weight: inherit;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    margin-top: 3dvmin;
+    margin-right: 2dvmin;
+}
+
+.dialog button:hover,
+.dialog button:focus-visible {
+    background: var(--browse-current-row-color);
+}

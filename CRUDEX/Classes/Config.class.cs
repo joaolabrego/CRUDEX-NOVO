@@ -11,6 +11,7 @@ namespace CRUDEX.Classes
     public class Config
     {
         public readonly string ClassName = "Config";
+        public readonly string OwnerName = Convert.ToString(Settings.Get("OWNER_NAME"));
         public readonly int RowsPerPage = Convert.ToInt32(Settings.Get("ROWS_PER_PAGE"));
         public readonly int RowsPerChildPage = Convert.ToInt32(Settings.Get("ROWS_PER_CHILD_PAGE"));
         public readonly int RowsPerDropdownPage = Convert.ToInt32(Settings.Get("ROWS_PER_DROPDOWN_PAGE"));
@@ -61,7 +62,7 @@ namespace CRUDEX.Classes
                     Actions = Actions.GetObject(),
                 };
                 config.Styles = new Styles();
-                config.Images = new Images(config.Data.System.Rows[0]["ClientName"]);
+                config.Images = new Images();
             }
             else
             {

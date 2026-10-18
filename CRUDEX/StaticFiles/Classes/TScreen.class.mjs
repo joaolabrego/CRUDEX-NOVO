@@ -41,7 +41,7 @@ export default class TScreen {
         header.className = "box header";
 
         let span = document.createElement("span");
-        span.textContent = TSystem.ClientName;
+        span.textContent = TSystem.OwnerName;
         header.appendChild(span);
 
         span = document.createElement("span");
@@ -158,6 +158,6 @@ export default class TScreen {
      * @param {boolean} value
      */
     static set WithBackgroundImage(value) {
-        this.#HTML.Main.style.backgroundImage = value ? this.#BackgroundImage : null;
+        this.#HTML.Main.style.backgroundImage = value ? `url("${this.#BackgroundImage}")` : "none";
     }
 }

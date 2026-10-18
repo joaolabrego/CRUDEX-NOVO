@@ -31,6 +31,7 @@ export default class TSystem {
     static #RowsPerDropdownPage = 5;
     static #PaddingGridLastPage = false;
     static #ReverseItemsWhenOpenUp = false;
+    static #OwnerName = "";
     static #Types = [];
     static #Domains = [];
     static #Databases = [];
@@ -63,6 +64,7 @@ export default class TSystem {
                 this.#RowsPerPage = config.RowsPerPage;
                 this.#RowsPerChildPage = config.RowsPerChildPage;
                 this.#RowsPerDropdownPage = config.RowsPerDropdownPage;
+                this.#OwnerName = config.OwnerName;
                 document.documentElement.style.setProperty("--rows-per-page", String(this.#RowsPerPage));
                 document.documentElement.style.setProperty("--rows-per-child-page", String(this.#RowsPerChildPage));
                 document.documentElement.style.setProperty("--rows-per-dropdown-page", String(this.#RowsPerDropdownPage));
@@ -192,6 +194,9 @@ export default class TSystem {
     }
     static GetMaskByName(name) {
         return this.#Masks.find(mask => mask.Name === name);
+    }
+    static get OwnerName() {
+        return this.#OwnerName;
     }
     static get Comparators() {
         return this.#Comparators;

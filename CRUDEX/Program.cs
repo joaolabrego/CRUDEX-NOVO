@@ -65,7 +65,7 @@ namespace CRUDEX.Classes
 
             app.MapGet("/", async (HttpContext context) =>
             {
-                await Scripts.Generate();
+                //await Scripts.Generate();
                 await ExecuteRoute(context);
             });
             app.MapGet("/{systemName}", async (HttpContext context, string systemName) => await ExecuteRoute(context, systemName, Actions.CHECK));

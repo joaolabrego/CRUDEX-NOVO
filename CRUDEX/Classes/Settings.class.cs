@@ -29,6 +29,11 @@ namespace CRUDEX.Classes
             EnsureDataEncryptionKey();
             EnsureRsaKeyPair();
             Application.UseRouting();
+            Application.UseWebSockets(new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromMinutes(1),
+                KeepAliveTimeout = TimeSpan.FromMinutes(1)
+            });
 
             return Application;
         }

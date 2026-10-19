@@ -2,7 +2,6 @@ IF(SELECT object_id('[dbo].[Config]', 'P')) IS NULL
 	EXEC('CREATE PROCEDURE [dbo].[Config] AS PRINT 1')
 GO
 ALTER PROCEDURE [dbo].[Config](@SystemName VARCHAR(25)
-							  ,@EnvironmentName VARCHAR(25) = NULL
 							  ,@TableName VARCHAR(25) = NULL) AS
 BEGIN
 	SET NOCOUNT ON
@@ -31,20 +30,18 @@ BEGIN
 		SET @ErrorMessage = 'Sistema "' + @SystemName + '" não cadastrado.';
 		THROW 51000, @ErrorMessage, 1
 	END
-	IF (SELECT [IsActive] FROM [#System]) = 0 BEGIN
+	IF EXISTS (SELECT 1 FROM [#Systems] WHERE [IsActive] = 0) BEGIN
 		SET @ErrorMessage = CONCAT('Sistema "', @SystemName,  '" inativo.');
 		THROW 51000, @ErrorMessage, 1
 	END
-	IF (SELECT [IsOffAir] FROM [#System]) = 1 BEGIN
+	IF EXISTS (SELECT 1 FROM [#System] WHERE [IsOffAir] = 1) BEGIN
 		SET @ErrorMessage = CONCAT('Sistema "', @SystemName, '" fora do ar.');
 		THROW 51000, @ErrorMessage, 1
 	END
-	IF @EnvironmentName IS NULL
+	IF @TableName IS NULL
 		RETURN 0
-	IF @EnvironmentName = 'all' BEGIN
-		SET @EnvironmentName = NULL
+	IF @TableName = 'all'
 		SET @TableName = NULL
-	END
 	-- 1 [Database]
 	SELECT 	'Database' AS [Kind]
 			,[Id]
@@ -61,45 +58,6 @@ BEGIN
 	
 	DECLARE @DatabaseName VARCHAR(25) = (SELECT [Name] FROM [#Database])
 
-	-- 2 [Connection]
-	SELECT  'Connection' AS [Kind]
-			,[C].[Id]
-			,[C].[Name]
-			,[C].[Description]
-		INTO [#Connections]
-		FROM [dbo].[Connections] [C]
-			INNER JOIN [#Database] [D] ON [D].[ConnectionId] = [C].[Id]
-	IF @@ROWCOUNT = 0 BEGIN
-		SET @ErrorMessage = CONCAT('Conexão do banco-de-dados "', @DatabaseName, '" não cadastrada.');
-		THROW 51000, @ErrorMessage, 1
-	END
-	-- 3 [Environment]
-	SELECT	[Id]
-			,[Sequence]
-			,[Name]
-			,[Description]
-			,[IsRequired]
-		INTO [#Environments]
- 		FROM [Environments]
-		WHERE @EnvironmentName IS NULL OR [Name] = @EnvironmentName
-	IF @@ROWCOUNT = 0 BEGIN
-		SET @ErrorMessage = CONCAT('Ambiente "', @EnvironmentName, '" não cadastrado.');
-		THROW 51000, @ErrorMessage, 1
-	END
-	-- 3 [StringConnections]
-	SELECT	[S].[Id]
-			,[S].[ConnectionId]
-			,[S].[EnvironmentId]
-			,[S].[Directory]
-			,[S].[ConnectionString]
-		INTO [#String]
-		FROM [Strings] [S]
-			INNER JOIN [#Connections] [C] ON [C].[Id] = [S].[ConnectionId]
-			INNER JOIN [#Environments] [E] ON [E].[Id] = [S].[EnvironmentId]
-	IF @@ROWCOUNT = 0 BEGIN
-		SET @ErrorMessage = CONCAT('ConnectionString do banco-de-dados "', @DatabaseName, '" não cadastrado.');
-		THROW 51000, @ErrorMessage, 1
-	END
 	-- 4 [Tables]
 	SELECT	'Table' AS [Kind]
 			,[Id]
@@ -113,12 +71,12 @@ BEGIN
 			INNER JOIN [#Databases] [D] ON [D].[Id] = [T].[DatabaseId]
 		WHERE @TableName IS NULL OR [T].[Name] = @TableName
 	IF @@ROWCOUNT = 0 BEGIN
-		SET @ErrorMessage = CONCAT('Tabelas do banco-de-dados "', @DatabaseName, '" não cadastrada(s).');
+		SET @ErrorMessage = CONCAT('Tabelas do banco-de-dados "', @DatabaseName, '" não existem.');
 		THROW 51000, @ErrorMessage, 1
 	END
 	ALTER TABLE [#Tables] ADD PRIMARY KEY CLUSTERED([Id])
 
-	IF @EnvironmentName IS NULL BEGIN
+	IF @TableName IS NULL BEGIN
 		-- 4 [Columns]
 		SELECT	'Column' AS [Kind]
 				,[Id]
@@ -142,7 +100,7 @@ BEGIN
 			FROM [dbo].[Columns] [C]
 				INNER JOIN [#Tables] [T] ON [T].[Id]= [C].[TableId] 
 		IF @@ROWCOUNT = 0 BEGIN
-			SET @ErrorMessage = CONCAT('Colunas de tabelas do banco-de-dados "', @DatabaseName, '" não cadastradas.');
+			SET @ErrorMessage = CONCAT('Colunas de tabelas do banco-de-dados "', @DatabaseName, '" não existem.');
 			THROW 51000, @ErrorMessage, 1
 		END
 		ALTER TABLE [#Columns] ADD PRIMARY KEY CLUSTERED([Id])
@@ -160,7 +118,7 @@ BEGIN
 				,[D].[Maximum]
 				,[D].[ValidChars]
 				,[D].[ValidValues]
-				,[D].[ListValues
+				,[D].[ListValues]
 			INTO [#Domains]
 			FROM [dbo].[Domains] [D]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Columns] WHERE [DomainId] = [D].[Id])
@@ -173,99 +131,75 @@ BEGIN
 
 		-- 6 [Types]
 		SELECT 	'Type' AS [Kind]
-				,[T].[Id]
-				,[T].[CategoryId]
-				,[T].[Name]
-				,[T].[MaxLength]
-				,[T].[Minimum]
-				,[T].[Maximum]
-				,[T].[AskLength]
-				,[T].[AskDecimals]
-				,[T].[AskPrimarykey]
-				,[T].[AskAutoincrement]
-				,[T].[AskFilterable]
-				,[T].[AskGridable]
-				,[T].[AskCodification]
-				,[T].[IsActive]
+				,[T].[Id
+				,[T].[CategoryId
+				,[T].[Name
+				,[T].[Minimum
+				,[T].[Maximum
+				,[T].[AskLength
+				,[T].[AskDecimals
+				,[T].[AskPrimarykey
+				,[T].[AskAutoincrement
+				,[T].[IsIndexable
+				,[T].[IsActive
 			INTO [#Types]
 			FROM [dbo].[Types] [T]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Domains] WHERE [TypeId] = [T].[Id])
-		IF @@ROWCOUNT = 0
-			THROW 51000, 'Tipos de domínios não cadastrados.', 1
+		IF @@ROWCOUNT = 0 BEGIN
+			SET @ErrorMessage = CONCAT('Tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não cadastrados.');
+			THROW 51000, @ErrorMessage, 1
+		END
 		CREATE INDEX [#TypesCategoryId] ON [#Types]([CategoryId])
 
 		-- 7 [Categories]
 		SELECT 	'Category' AS [Kind]
 				,[C].[Id]
 				,[C].[Name]
-				,[C].[AskEncrypted]
-				,[C].[AskMask]
-				,[C].[AskListable]
 				,[C].[AskDefault]
 				,[C].[AskMinimum]
 				,[C].[AskMaximum]
 				,[C].[AskInWords]
+				,[C].[AskMask]
+				,[C].[AskBrowseable]
+				,[C].[AskFilterable]
+				,[C].[AskEncrypted]
+				,[C].[AskListable]
 			INTO [#Categories]
 			FROM [dbo].[Categories] [C]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Types] WHERE [CategoryId] = [C].[Id])
-		IF @@ROWCOUNT = 0
-			THROW 51000, 'Categoria(s) de tipos não cadastrada(s).', 1
+		IF @@ROWCOUNT = 0 BEGIN
+			SET @ErrorMessage = CONCAT('Cateorias de tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não cadastrados.');
+			THROW 51000, @ErrorMessage, 1
+		END
 
 		-- 8 [Menus]
 		SELECT 	'Menu' AS [Kind]
 				,[M].[Id]
 				,[M].[SystemId]
+				,[M].[ParentMenuId]
 				,[M].[Sequence]
-				,[M].[Caption]
+				,[M].[Option]
 				,[M].[Message]
 				,[M].[Action]
-				,[M].[ParentMenuId]
+				,[M].[IsActive]
 			INTO [#Menus]
 			FROM [dbo].[Menus] [M]
 				INNER JOIN [#Systems] [S] ON [S].[Id] = [M].[SystemId]
-		IF @@ROWCOUNT = 0
-			THROW 51000, 'Menu(s) de sistema não cadastrado(s).', 1
+		IF @@ROWCOUNT = 0 BEGIN
+			SET @ErrorMessage = CONCAT('Menu do sistema não cadastrado.', @SystemName);
+			THROW 51000, @ErrorMessage, 1
+		END
 
-		-- 9 [Indexes]
-		SELECT 	'Index' AS [Kind]
-				,[I].[Id]
-				,[I].[TableId]
-				,[I].[Name]
-				,[I].[IsUnique]
-			INTO [#Indexes]
-			FROM [dbo].[Indexes] [I]
-				INNER JOIN [#Tables] [T] ON [T].[Id] = [I].[TableId]
-		ALTER TABLE [#Indexes] ADD PRIMARY KEY NONCLUSTERED([Id])
-
-		-- 10 [Indexkeys]
-		SELECT 	'Indexkey' AS [Kind]
-				,[IK].[Id]
-				,[IK].[IndexId]
-				,[IK].[Sequence]
-				,[IK].[ColumnId]
-				,[IK].[IsDescending]
-			INTO [#Indexkeys]
-			FROM [dbo].[Indexkeys] [IK]
-				INNER JOIN [#Indexes] [I] ON [I].[Id] = [IK].IndexId
-			
 		-- 11 [Masks]
 		SELECT 	'Mask' AS [Kind]
 				,[M].[Id]
 				,[M].[Name]
 				,[M].[Mask]
+				,[M].[Modificators]
 			INTO [#Masks]
 			FROM [dbo].[Masks] [M]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Domains] WHERE [MaskId] = [M].[Id])
 			
-		-- 12 [Unicities]
-		SELECT 'Unicity' AS [Kind]
-				,[U].[Id]
-				,[U].[ColumnId1]
-				,[U].[ColumnId2]
-				,[U].[IsBidirectional]
-			INTO [#Unicities]
-			FROM [dbo].[Unicities] [U]
-			WHERE EXISTS(SELECT 1 FROM [dbo].[#Columns] WHERE [Id] IN ([U].[ColumnId1], [U].[ColumnId2]))
 		-- 12 [Comparators]
 		SELECT 'Comparator' AS [Kind]
 				,[Id]

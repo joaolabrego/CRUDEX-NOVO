@@ -33,20 +33,17 @@ export default class TConfig {
             url = location.pathname.replace(/\/$/, ""),
             useSpinner = showSpinner && action !== "config",
             useCrypto = action !== "config",
-            establishSession = action === "login" || action === "change";
 
         try {
             if (useSpinner)
                 TSpinner.Show();
-            if (establishSession) {
-                if (!TransportCrypto.ClientRsaPublicKeySpki)
-                    throw new Error("Chave pública RSA do cliente não inicializada.");
-                await TransportCrypto.beginSession();
-            }
             if (action === "config") {
                 body.Parameters = { Action: "config" };
             }
             else if (action === "login" || action === "change") {
+                if (!TransportCrypto.ClientRsaPublicKeySpki)
+                    throw new Error("Chave pública RSA do cliente não inicializada.");
+                await TransportCrypto.beginSession();
                 body.Login = {
                     Action: action,
                     SystemName: TSystem.Name,
@@ -101,6 +98,7 @@ export default class TConfig {
 
             if (action === "logout") {
                 const wire = JSON.stringify(request);
+
                 if (navigator.sendBeacon) {
                     if (!navigator.sendBeacon(url, new Blob([wire], { type: "application/json" })))
                         await fetch(url, { method: "POST", headers, body: wire, keepalive: true });

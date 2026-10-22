@@ -4,14 +4,23 @@
 export default class TIntercom {
     #Socket = null;
     #URL;
+    #PingInterval;
+    #PingTimer = null;
 
     OnOpen = null;
     OnMessage = null;
     OnClose = null;
     OnError = null;
 
-    constructor(url) {
+    constructor(url, pingInterval = 60000) {
+        if (!Number.isInteger(pingInterval) ||
+            pingInterval < 1 ||
+            pingInterval > 2147483647) {
+            throw new RangeError("Informe um intervalo válido para o ping, em milissegundos.");
+        }
+
         this.#URL = url;
+        this.#PingInterval = pingInterval;
     }
 
     async Connect() {
@@ -26,8 +35,9 @@ export default class TIntercom {
 
         return new Promise((resolve, reject) => {
             socket.addEventListener("open", () => {
-                resolve(this);
+                this.#StartPing();
                 this.OnOpen?.();
+                resolve(this);
             });
 
             socket.addEventListener("message", event => {
@@ -44,16 +54,46 @@ export default class TIntercom {
             });
 
             socket.addEventListener("error", () => {
+                this.#StopPing();
+
                 const error = new Error("Falha na conexão do Intercom.");
                 reject(error);
                 this.OnError?.(error);
             });
 
             socket.addEventListener("close", event => {
+                this.#StopPing();
                 reject(new Error("O Intercom foi encerrado antes de conectar."));
                 this.OnClose?.(event);
             });
         });
+    }
+
+    #StartPing() {
+        this.#StopPing();
+
+        const sendPing = () => {
+            if (!this.IsOpen) {
+                this.#StopPing();
+                return;
+            }
+
+            try {
+                this.Send({ Action: "ping" });
+            } catch (error) {
+                this.OnError?.(error);
+            }
+        };
+
+        sendPing();
+        this.#PingTimer = setInterval(sendPing, this.#PingInterval);
+    }
+
+    #StopPing() {
+        if (this.#PingTimer !== null) {
+            clearInterval(this.#PingTimer);
+            this.#PingTimer = null;
+        }
     }
 
     Send(message) {
@@ -69,6 +109,7 @@ export default class TIntercom {
     }
 
     Close(code = 1000, reason = "") {
+        this.#StopPing();
         this.#Socket?.close(code, reason);
     }
 

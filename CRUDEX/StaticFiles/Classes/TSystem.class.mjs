@@ -48,6 +48,10 @@ export default class TSystem {
     static #References = [];
     static #Actions = null;
 
+    static Initialize() {
+
+    }
+
     static Run(withBackgroundImage = true) {
         TConfig.GetAPI("config")
             .then(async config => {

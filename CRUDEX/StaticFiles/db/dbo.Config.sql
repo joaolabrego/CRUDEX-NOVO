@@ -2,15 +2,21 @@ IF(SELECT object_id('[dbo].[Config]', 'P')) IS NULL
 	EXEC('CREATE PROCEDURE [dbo].[Config] AS PRINT 1')
 GO
 ALTER PROCEDURE [dbo].[Config](@SystemName VARCHAR(25)
+							  ,@EnvironmentName VARCHAR(25)
 							  ,@TableName VARCHAR(25) = NULL) AS
 BEGIN
 	SET NOCOUNT ON
 	SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+
 	DECLARE @ErrorMessage VARCHAR(MAX)
 
 	SET @ReturnValue = 1
 	IF @SystemName IS NULL BEGIN
 		SET @ErrorMessage = 'Nome de sistema é requerido.';
+		THROW 51000, @ErrorMessage, 1
+	END
+	IF @EnvironmentName IS NULL BEGIN
+		SET @ErrorMessage = 'Nome de ambiente é requerido.';
 		THROW 51000, @ErrorMessage, 1
 	END
 	-- 0 [System]
@@ -38,6 +44,20 @@ BEGIN
 		SET @ErrorMessage = CONCAT('Sistema "', @SystemName, '" fora do ar.');
 		THROW 51000, @ErrorMessage, 1
 	END
+	-- 1 [Environment]
+	SELECT 	'Environment' AS [Kind]
+			,[Id]
+			,[Sequence]
+			,[Name]
+			,[Description]
+			,[IsRequired]
+		INTO [#Environment]
+		FROM [dbo].[Environments]
+		WHERE [Name] = @EnvironmentName
+	IF @@ROWCOUNT = 0 BEGIN
+		SET @ErrorMessage = 'Ambiente "' + @EnvironmentName + '" não existe.';
+		THROW 51000, @ErrorMessage, 1
+	END
 	IF @TableName IS NULL
 		RETURN 0
 	IF @TableName = 'all'
@@ -52,7 +72,7 @@ BEGIN
 		FROM [dbo].[Databases] [D]
 			INNER JOIN [#Systems] [S] ON [S].[DatabaseId] = [D].[Id]
 	IF @@ROWCOUNT = 0 BEGIN
-		SET @ErrorMessage = CONCAT('Banco-de-dados do sistema "', @SystemName, '" não cadastrado(s).');
+		SET @ErrorMessage = CONCAT('Banco-de-dados do sistema "', @SystemName, '" não existe.');
 		THROW 51000, @ErrorMessage, 1
 	END
 	
@@ -123,7 +143,7 @@ BEGIN
 			FROM [dbo].[Domains] [D]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Columns] WHERE [DomainId] = [D].[Id])
 		IF @@ROWCOUNT = 0 BEGIN
-			SET @ErrorMessage = CONCAT('Domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não cadastrados.');
+			SET @ErrorMessage = CONCAT('Domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não existem.');
 			THROW 51000, @ErrorMessage, 1
 		END
 		ALTER TABLE [#Domains] ADD PRIMARY KEY NONCLUSTERED([Id])
@@ -146,7 +166,7 @@ BEGIN
 			FROM [dbo].[Types] [T]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Domains] WHERE [TypeId] = [T].[Id])
 		IF @@ROWCOUNT = 0 BEGIN
-			SET @ErrorMessage = CONCAT('Tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não cadastrados.');
+			SET @ErrorMessage = CONCAT('Tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não existem.');
 			THROW 51000, @ErrorMessage, 1
 		END
 		CREATE INDEX [#TypesCategoryId] ON [#Types]([CategoryId])
@@ -168,7 +188,7 @@ BEGIN
 			FROM [dbo].[Categories] [C]
 			WHERE EXISTS(SELECT TOP 1 1 FROM [#Types] WHERE [CategoryId] = [C].[Id])
 		IF @@ROWCOUNT = 0 BEGIN
-			SET @ErrorMessage = CONCAT('Cateorias de tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não cadastrados.');
+			SET @ErrorMessage = CONCAT('Categorias de tipos de domínios de colunas de tabela do banco-de-dados "', @DatabaseName, '" não existem.');
 			THROW 51000, @ErrorMessage, 1
 		END
 
@@ -184,9 +204,9 @@ BEGIN
 				,[M].[IsActive]
 			INTO [#Menus]
 			FROM [dbo].[Menus] [M]
-				INNER JOIN [#Systems] [S] ON [S].[Id] = [M].[SystemId]
+				INNER JOIN [#System] [S] ON [S].[Id] = [M].[SystemId]
 		IF @@ROWCOUNT = 0 BEGIN
-			SET @ErrorMessage = CONCAT('Menu do sistema não cadastrado.', @SystemName);
+			SET @ErrorMessage = CONCAT('Opções de menu do sistema "', @SystemName, '" não existem.');
 			THROW 51000, @ErrorMessage, 1
 		END
 
@@ -198,7 +218,8 @@ BEGIN
 				,[M].[Modificators]
 			INTO [#Masks]
 			FROM [dbo].[Masks] [M]
-			WHERE EXISTS(SELECT TOP 1 1 FROM [#Domains] WHERE [MaskId] = [M].[Id])
+				INNER JOIN [#Maskings] [M1] ON [M1].[MaskId] = [M].[Id]
+			WHERE EXISTS(SELECT TOP 1 1 FROM [#Domains] WHERE [Id] = [M1].[DomainId])
 			
 		-- 12 [Comparators]
 		SELECT 'Comparator' AS [Kind]

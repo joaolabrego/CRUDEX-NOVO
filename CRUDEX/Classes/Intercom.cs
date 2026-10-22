@@ -16,8 +16,16 @@ public sealed class Intercom : IDisposable
     private readonly SemaphoreSlim _sendLock = new(1, 1);
     private int _listening;
 
+    /// <summary>Recebe mensagens JSON que não sejam avisos de ping.</summary>
     public Func<JsonElement, Task>? OnMessage { get; set; }
+
+    /// <summary>Chamado ao receber um ping JSON do frontend.</summary>
+    public Func<DateTimeOffset, Task>? OnPing { get; set; }
+
     public Func<Task>? OnClosed { get; set; }
+
+    /// <summary>Horário UTC do último ping recebido.</summary>
+    public DateTimeOffset? LastPingUtc { get; private set; }
 
     public bool IsOpen => _socket.State == WebSocketState.Open;
 
@@ -56,7 +64,8 @@ public sealed class Intercom : IDisposable
 
                     if (received.MessageType != WebSocketMessageType.Text)
                     {
-                        await CloseAsync(cancellationToken,
+                        await CloseAsync(
+                            cancellationToken,
                             WebSocketCloseStatus.InvalidMessageType,
                             "O Intercom recebe apenas mensagens JSON de texto.");
                         return;
@@ -67,23 +76,57 @@ public sealed class Intercom : IDisposable
                 while (!received.EndOfMessage);
 
                 using var document = JsonDocument.Parse(content.ToArray());
-                var handler = OnMessage;
+                var message = document.RootElement.Clone();
 
-                if (handler != null)
-                    await handler(document.RootElement.Clone());
+                if (IsPing(message))
+                {
+                    var receivedAt = DateTimeOffset.UtcNow;
+                    LastPingUtc = receivedAt;
+
+                    var pingHandler = OnPing;
+                    if (pingHandler != null)
+                        await pingHandler(receivedAt);
+
+                    continue;
+                }
+
+                var messageHandler = OnMessage;
+                if (messageHandler != null)
+                    await messageHandler(message);
             }
         }
         finally
         {
             Dispose();
-            var handler = OnClosed;
 
-            if (handler != null)
-                await handler();
+            var closedHandler = OnClosed;
+            if (closedHandler != null)
+                await closedHandler();
         }
     }
 
-    public async Task SendAsync(object? message,
+    private static bool IsPing(JsonElement message)
+    {
+        if (message.ValueKind != JsonValueKind.Object)
+            return false;
+
+        foreach (var property in message.EnumerateObject())
+        {
+            if (string.Equals(property.Name, "Action", StringComparison.OrdinalIgnoreCase))
+            {
+                return property.Value.ValueKind == JsonValueKind.String &&
+                    string.Equals(
+                        property.Value.GetString(),
+                        "ping",
+                        StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        return false;
+    }
+
+    public async Task SendAsync(
+        object? message,
         CancellationToken cancellationToken = default)
     {
         var content = JsonSerializer.SerializeToUtf8Bytes(message);
@@ -95,8 +138,11 @@ public sealed class Intercom : IDisposable
             if (!IsOpen)
                 throw new InvalidOperationException("O Intercom não está conectado.");
 
-            await _socket.SendAsync(new ArraySegment<byte>(content),
-                WebSocketMessageType.Text, true, cancellationToken);
+            await _socket.SendAsync(
+                new ArraySegment<byte>(content),
+                WebSocketMessageType.Text,
+                true,
+                cancellationToken);
         }
         finally
         {
@@ -106,7 +152,8 @@ public sealed class Intercom : IDisposable
 
     // Envia o fechamento; ListenAsync recebe a confirmação do outro lado.
     // CloseOutputAsync evita iniciar uma segunda leitura concorrente.
-    public async Task CloseAsync(CancellationToken cancellationToken = default,
+    public async Task CloseAsync(
+        CancellationToken cancellationToken = default,
         WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure,
         string reason = "")
     {

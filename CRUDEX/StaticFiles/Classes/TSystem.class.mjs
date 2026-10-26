@@ -53,6 +53,7 @@ export default class TSystem {
     }
 
     static Run(withBackgroundImage = true) {
+        debugger
         TConfig.GetAPI("config")
             .then(async config => {
                 await TransportCrypto.Initialize(config.RsaPublicKey);

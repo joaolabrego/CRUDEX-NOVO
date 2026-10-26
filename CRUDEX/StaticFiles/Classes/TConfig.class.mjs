@@ -32,7 +32,7 @@ export default class TConfig {
             },
             url = location.pathname.replace(/\/$/, ""),
             useSpinner = showSpinner && action !== "config",
-            useCrypto = action !== "config",
+            useCrypto = action !== "config"
 
         try {
             if (useSpinner)
